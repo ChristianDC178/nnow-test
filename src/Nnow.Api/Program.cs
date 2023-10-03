@@ -17,6 +17,7 @@ builder.Services.Configure<Nnow.Settings.NnowAppKeys>(
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+
 builder.Services.AddApplicationDependencies();
 
 var app = builder.Build();

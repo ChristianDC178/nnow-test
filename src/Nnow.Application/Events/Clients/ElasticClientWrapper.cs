@@ -1,5 +1,6 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nnow.Application.Events.Messages;
 using Nnow.Settings;
@@ -10,20 +11,31 @@ internal class ElasticSearchClientWrapper
 {
     ElasticsearchClient client = null;
     readonly IOptions<NnowAppKeys> _keys;
+    readonly ILogger<ElasticSearchClientWrapper> _logger;
 
-    public ElasticSearchClientWrapper(IOptions<NnowAppKeys> keys )
+    public ElasticSearchClientWrapper(
+        IOptions<NnowAppKeys> keys,
+        ILogger<ElasticSearchClientWrapper> logger)
     {
-        var apiKey = keys.Value.ElasticApiKey;
-        var cloudId = keys.Value.ElasticCloudId;
         _keys = keys;
-
-        client = new ElasticsearchClient(cloudId, new ApiKey(apiKey));
+        client = new ElasticsearchClient(_keys.Value.ElasticCloudId, new ApiKey(_keys.Value.ElasticApiKey));
+        _logger = logger;
     }
 
-    public async Task<IndexResponse> IndexPermission(PermissionMessage permissionNotification, CancellationToken cancellationToken)
+    public async Task IndexPermission(PermissionMessage permissionNotification, CancellationToken cancellationToken)
     {
-        var response = await client.IndexAsync(permissionNotification,_keys.Value.ElasticIndex ,cancellationToken );
-        return response;
+        try
+        {
+            _logger.LogInformation($"Sending messafe to Elastic. Index: { _keys.Value.ElasticIndex}");
+            var response = await client.IndexAsync(permissionNotification, _keys.Value.ElasticIndex, cancellationToken);
+
+            if (response.IsValidResponse && response.IsSuccess())
+                _logger.LogInformation($"Message to Elastic sent successfully: {response.Id}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error trying to put to Elastic", ex);
+        }
     }
 
 }
