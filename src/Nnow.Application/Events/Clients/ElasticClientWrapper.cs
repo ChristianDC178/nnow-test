@@ -34,6 +34,9 @@ internal class ElasticSearchClientWrapper
         }
         catch (Exception ex)
         {
+            if(cancellationToken.IsCancellationRequested)
+                _logger.LogError($"Elastic Search Client - The thread was cancelled", ex);
+
             _logger.LogError($"Error trying to put to Elastic", ex);
         }
     }

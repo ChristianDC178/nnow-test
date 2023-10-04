@@ -10,17 +10,17 @@ public class GenericRepository<TEntity> where TEntity : EntityBase
 
     public GenericRepository(NnowContext context) => _context = context;
 
-    public async Task<TEntity> GetByIdAsync(int id, string property = null)
+    public async Task<TEntity> GetByIdAsync(int id, CancellationToken cToken = default(CancellationToken), string property = null)
     {
         var set = _context.Set<TEntity>();
         IQueryable<TEntity> query = null;
 
         if (property != null)
         {
-          query = _context.Set<TEntity>().Include(property);
+            query = _context.Set<TEntity>().Include(property);
         }
 
-        return await set.FirstOrDefaultAsync(e => e.Id == id);
+        return await set.FirstOrDefaultAsync(e => e.Id == id, cToken);
     }
 
     public IQueryable<TEntity> GetQueryable()

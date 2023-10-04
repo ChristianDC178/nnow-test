@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using NuGet.Frameworks;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
+using Elastic.Clients.Elasticsearch.Core.Reindex;
 
 namespace Nnow.Test;
 
@@ -14,6 +15,8 @@ public class Tests
 {
 
     HostApplicationBuilder builder;
+    CancellationTokenSource source = new CancellationTokenSource();
+    CancellationToken token;
 
     [SetUp]
     public void Setup()
@@ -27,6 +30,7 @@ public class Tests
 
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
+        token = source.Token;
     }
 
     [Test]
@@ -37,8 +41,7 @@ public class Tests
 
         IMediator mediator = host.Services.GetRequiredService<IMediator>();
 
-        CancellationToken cancellationToken = new CancellationToken();
-        var result = mediator.Send(new GetPermissionCommand() { PermissionId = 3 }, cancellationToken).Result;
+        var result = mediator.Send(new GetPermissionCommand() { PermissionId = 3 }, token).Result;
 
         Assert.IsTrue(result != null);
     }
@@ -50,8 +53,6 @@ public class Tests
 
         IMediator mediator = host.Services.GetRequiredService<IMediator>();
 
-        CancellationToken cancellationToken = new CancellationToken();
-
         var result = mediator.Send(
             new ModifyPermissionCommand()
             {
@@ -60,7 +61,7 @@ public class Tests
                 PermissionId = 1,
                 PermissionTypeId = 2,
             }
-            , cancellationToken).Result;
+            , token).Result;
 
         Assert.IsTrue(result != null);
         Assert.IsTrue(result.Valid);
@@ -75,8 +76,6 @@ public class Tests
 
         IMediator mediator = host.Services.GetRequiredService<IMediator>();
 
-        CancellationToken cancellationToken = new CancellationToken();
-
         var result = mediator.Send(
             new RequestPermissionCommand()
             {
@@ -84,10 +83,45 @@ public class Tests
                 Surname = "Jobs",
                 PermissionTypeId = 5,
             }
-            , cancellationToken).Result;
-        
-        
+            , token).Result;
+
         Assert.IsTrue(result != null);
         Assert.IsTrue(result.Valid);
     }
+
+
+    //Example of a test with thread cancellation
+    [Test]
+    public void Can_Cancell_RequestPermission()
+    {
+        try
+        {
+
+            source.Cancel();
+
+            IHost host = builder.Build();
+            IMediator mediator = host.Services.GetRequiredService<IMediator>();
+
+            var result = mediator.Send(
+                new RequestPermissionCommand()
+                {
+                    Forename = "Richard",
+                    Surname = "Stallman",
+                    PermissionTypeId = 3
+                }
+                , token).Result;
+
+            Assert.Fail();
+        }
+        catch (Exception ex)
+        {
+            Assert.IsTrue(ex is AggregateException);
+
+                var inner = ((AggregateException)ex).InnerExceptions[0];
+
+            Assert.IsTrue(inner is TaskCanceledException);
+        }
+    }
+
+
 }

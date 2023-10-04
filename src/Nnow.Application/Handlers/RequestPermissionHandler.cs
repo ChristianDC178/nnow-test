@@ -25,7 +25,7 @@ public class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand
         _logger = logger;
     }
 
-    public async Task<ApplicationResponse<Permission>> Handle(RequestPermissionCommand request, CancellationToken cancellationToken)
+    public async Task<ApplicationResponse<Permission>> Handle(RequestPermissionCommand request, CancellationToken cToken = default(CancellationToken))
     {
         try
         {
@@ -36,7 +36,7 @@ public class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand
                 response.Errors.Add("All fields must be completed and with correct values");
             }
 
-            var pType = await _unitOfWork.PermissionTypeRepo.GetByIdAsync(request.PermissionTypeId);
+            var pType = await _unitOfWork.PermissionTypeRepo.GetByIdAsync(request.PermissionTypeId, cToken);
 
             if (pType == null)
             {
@@ -55,9 +55,9 @@ public class RequestPermissionHandler : IRequestHandler<RequestPermissionCommand
             };
 
             _unitOfWork.PermissionRepo.Create(permission);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cToken);
 
-            _mediator.Publish(new PermissionMessage(permission, NotificationType.request));
+            _mediator.Publish(new PermissionMessage(permission, NotificationType.request), cToken);
 
             response.Entity = permission;
 

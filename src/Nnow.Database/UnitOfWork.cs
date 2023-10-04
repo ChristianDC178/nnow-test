@@ -4,7 +4,6 @@ namespace Nnow.Database;
 
 public class UnitOfWork
 {
-
     private readonly NnowContext _context;
     private GenericRepository<Permission> _permissionRepo;
     private GenericRepository<PermissionType> _permissionTypeRepo;
@@ -21,14 +20,9 @@ public class UnitOfWork
         get { return _permissionTypeRepo ?? new GenericRepository<PermissionType>(_context); }
     }
 
-    public async Task SaveChangesAsync()
-    { 
-         await _context.SaveChangesAsync();
-    }
-
-    public int SaveChanges()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
-        return _context.SaveChanges();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
 }

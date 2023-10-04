@@ -37,7 +37,6 @@ public class KafkaClientWrapper
     {
         try
         {
-
             _logger.LogInformation($"Trying to permisos Message {message.Id} {message.Operation} to Kakfa.Topic: {_keys.Value.KafkaTopic}");
 
             using (var producer = builder.Build())
@@ -54,7 +53,10 @@ public class KafkaClientWrapper
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error trying to publish to Kafka" , ex);
+            if (cancellationToken.IsCancellationRequested)
+                _logger.LogError($"Kafka client - The thread was cancelled", ex);
+
+            _logger.LogError($"Error trying to publish to Kafka", ex);
         }
     }
 

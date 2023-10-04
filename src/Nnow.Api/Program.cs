@@ -1,4 +1,6 @@
+using Nnow.Api;
 using Nnow.Application;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(typeof(MapperProfile));
 
 builder.Services.Configure<Nnow.Settings.NnowAppKeys>(
     builder.Configuration.GetSection("NnowAppKeys"));
