@@ -35,7 +35,8 @@ public class PermissionsController : ControllerBase
         try
         {
             var appResponse = await _mediator.Send(reqCmd, cToken);
-            return StatusCode(StatusCodes.Status200OK, _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
+            return StatusCode(appResponse.Valid ?  StatusCodes.Status200OK : StatusCodes.Status400BadRequest
+                , _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
         }
         catch (Exception ex)
         {
@@ -51,7 +52,8 @@ public class PermissionsController : ControllerBase
         {
             reqCmd.PermissionId = id;
             var appResponse = await _mediator.Send(reqCmd, cToken);
-            return StatusCode(StatusCodes.Status200OK, _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
+            return StatusCode(appResponse.Valid ? StatusCodes.Status201Created : StatusCodes.Status400BadRequest, 
+                    _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
         }
         catch (Exception ex)
         {
@@ -67,7 +69,8 @@ public class PermissionsController : ControllerBase
         {
             GetPermissionCommand reqCmd = new() { PermissionId = id };
             var appResponse = await _mediator.Send(reqCmd, cToken);
-            return StatusCode(StatusCodes.Status200OK, _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
+            return StatusCode(appResponse.Valid ?  StatusCodes.Status302Found : StatusCodes.Status404NotFound, 
+                _mapper.Map<ApplicationResponseDto<PermissionDto>>(appResponse));
         }
         catch (Exception ex)
         {
