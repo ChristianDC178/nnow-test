@@ -35,6 +35,7 @@ public class ModifyPermissionHandler : IRequestHandler<ModifyPermissionCommand, 
                 response.Errors.Add("All fields must be completed and with correct values");
             }
 
+
             var pType = await _unitOfWork.PermissionTypeRepo.GetByIdAsync(request.PermissionTypeId, cToken);
             var permission = await _unitOfWork.PermissionRepo.GetByIdAsync(request.PermissionId, cToken);
 

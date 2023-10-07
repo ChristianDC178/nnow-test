@@ -11,8 +11,8 @@ public static class RegisterServices
     {
         services.AddTransient<UnitOfWork>();
         services.AddTransient<NnowContext>();
-        services.AddSingleton<ElasticSearchClientWrapper>();
-        services.AddSingleton<KafkaClientWrapper>();
+        services.AddScoped<ElasticSearchClientWrapper>();
+        services.AddScoped<KafkaClientWrapper>();
         services.AddMediatR(config =>
         {
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
