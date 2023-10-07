@@ -9,10 +9,10 @@ public static class RegisterServices
 {
     public static void AddApplicationDependencies(this IServiceCollection services)
     {
-        services.AddTransient<UnitOfWork>();
-        services.AddTransient<NnowContext>();
-        services.AddScoped<ElasticSearchClientWrapper>();
-        services.AddScoped<KafkaClientWrapper>();
+        services.AddScoped<UnitOfWork>();
+        services.AddScoped<NnowContext>();
+        services.AddTransient<ElasticSearchClientWrapper>();
+        services.AddTransient<KafkaClientWrapper>();
         services.AddMediatR(config =>
         {
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
